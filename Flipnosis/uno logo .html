@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UNO Logo — HTML · CSS · JS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --r:#e53935; /* red */
+      --y:#fbc02d; /* yellow */
+      --g:#43a047; /* green */
+      --b:#1e88e5; /* blue */
+      --bg:#0f1724;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071024 0%, #0f1724 50% , #122033 100%);font-family:Barlow, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    .stage{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      gap:32px;
+      padding:32px;
+    }
+
+    /* Card group container */
+    .uno-wrap{
+      position:relative;
+      width:420px;
+      height:240px;
+      transform-style:preserve-3d;
+      perspective:1000px;
+    }
+
+    /* Each color card */
+    .card{
+      position:absolute;
+      width:320px;
+      height:200px;
+      border-radius:28px;
+      box-shadow:0 18px 40px rgba(2,6,23,0.6), inset 0 -6px 18px rgba(0,0,0,0.25);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-size:110px;
+      font-weight:800;
+      text-shadow:0 4px 18px rgba(0,0,0,0.45);
+      transform-origin:center;
+      transition:transform 350ms cubic-bezier(.2,.9,.3,1), box-shadow 350ms;
+      user-select:none;
+    }
+
+    .card.u{background:linear-gradient(135deg,var(--r),#ff6b6b); left:0; top:20px; transform:rotate(-10deg) translateZ(-30px);}
+    .card.n{background:linear-gradient(135deg,var(--y),#ffd54d); left:40px; top:0; transform:rotate(4deg) translateZ(20px); color:#1b1b1b}
+    .card.o{background:linear-gradient(135deg,var(--g),#6bd36a); left:80px; top:20px; transform:rotate(12deg) translateZ(60px);}
+
+    /* subtle border ring to mimic UNO logo look */
+    .card::after{
+      content:'';
+      position:absolute;
+      inset:8px;
+      border-radius:20px;
+      box-shadow:inset 0 2px 0 rgba(255,255,255,0.06);
+      pointer-events:none;
+    }
+
+    /* outline/shine behind cards */
+    .glow{
+      position:absolute; inset:0; z-index:-1; filter:blur(32px); opacity:0.55;
+      background:radial-gradient(circle at 50% 40%, rgba(255,255,255,0.05), transparent 20%);
+      border-radius:34px;
+    }
+
+    /* Hover effects */
+    .uno-wrap:hover .card{transform:translateY(-8px) rotate(0deg) scale(1.02)}
+    .uno-wrap:hover .card.n{transform:translateY(-14px) translateX(18px) rotate(-2deg) scale(1.05)}
+    .uno-wrap:hover .card.o{transform:translateY(-20px) translateX(36px) rotate(6deg) scale(1.06)}
+    .uno-wrap:hover .card.u{transform:translateY(-8px) translateX(-6px) rotate(-6deg) scale(1.03)}
+
+    /* small tagline + controls */
+    .meta{color:rgba(255,255,255,0.85); text-align:center}
+    .meta p{margin:6px 0 0; font-size:14px; opacity:0.9}
+
+    /* Controls */
+    .controls{display:flex;gap:8px; margin-top:14px; justify-content:center; flex-wrap:wrap}
+    .btn{
+      background:transparent;border:1px solid rgba(255,255,255,0.08); padding:8px 12px;border-radius:8px;color:rgba(255,255,255,0.9);cursor:pointer;font-size:13px;
+      box-shadow:0 6px 18px rgba(2,6,23,0.5);
+    }
+
+    /* Responsive */
+    @media (max-width:520px){
+      .uno-wrap{width:300px;height:170px}
+      .card{width:240px;height:145px;font-size:72px;border-radius:18px}
+      .card.o{left:62px}
+      .card.n{left:28px}
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="uno-wrap" id="logo">
+      <div class="card u" data-letter="U">U</div>
+      <div class="card n" data-letter="N">N</div>
+      <div class="card o" data-letter="O">O</div>
+      <div class="glow"></div>
+    </div>
+
+    <div class="meta">
+      <strong>UNO-style logo (HTML · CSS · JS)</strong>
+      <p>Hover to animate. Use the buttons below to toggle effects.</p>
+      <div class="controls">
+        <button class="btn" id="shuffle">Shuffle</button>
+        <button class="btn" id="pulse">Toggle Pulse</button><a href="uno game.html"
+        button class="btn" id="start">Start</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const wrap = document.getElementById('logo');
+    const cards = Array.from(wrap.querySelectorAll('.card'));
+    const shuffleBtn = document.getElementById('shuffle');
+    const pulseBtn = document.getElementById('pulse');
+    const startBtn = document.getElementById('start');
+    let pulsing = false;
+    let pulseInterval = null;
+
+    function shuffleCards(){
+      // small randomized transforms to mimic a shuffled stack
+      cards.forEach((c,i)=>{
+        const rx = (Math.random()-0.5)*24; // rotation
+        const tx = (i*40) + (Math.random()-0.5)*20;
+        const ty = 10 + Math.random()*18;
+        const tz =  -40 + Math.random()*120;
+        c.style.transform = `translate(${tx}px, ${-ty}px) rotate(${rx}deg) translateZ(${tz}px) scale(${1+Math.random()*0.02})`;
+      });
+      // slight rumble shadow
+      wrap.animate([
+        {transform:'translateY(0px)'},
+        {transform:'translateY(-6px)'},
+        {transform:'translateY(0px)'}
+      ],{duration:420, easing:'cubic-bezier(.2,.9,.3,1)'});
+    }
+
+    function resetCards(){
+      cards.forEach((c,idx)=>{
+        c.style.transform=''; // remove inline transforms to fall back to CSS
+      });
+    }
+
+    shuffleBtn.addEventListener('click', ()=>{
+      shuffleCards();
+      setTimeout(resetCards, 800);
+    });
+
+    pulseBtn.addEventListener('click', ()=>{
+      pulsing = !pulsing;
+      if(pulsing){
+        pulseInterval = setInterval(()=>{
+          wrap.animate([
+            {filter: 'none', transform:'translateZ(0px) scale(1)'},
+            {filter: 'brightness(1.1)', transform:'translateZ(0px) scale(1.02)'},
+            {filter: 'none', transform:'translateZ(0px) scale(1)'}
+          ],{duration:900, easing:'ease-in-out'});
+        }, 1000);
+        pulseBtn.textContent='Stop Pulse';
+      } else {
+        clearInterval(pulseInterval);
+        pulseBtn.textContent='Toggle Pulse';
+      }
+    });
+
+    startBtn.addEventListener('click', ()=>{
+      alert('Game Started! (You can integrate real game logic here)');
+    });
+
+    // small entrance animation
+    window.addEventListener('load', ()=>{
+      wrap.animate([
+        {opacity:0, transform:'translateY(18px) rotateX(14deg)'},
+        {opacity:1, transform:'translateY(0px) rotateX(0deg)'}
+      ],{duration:700, easing:'cubic-bezier(.2,.9,.3,1)'});
+    });
+
+    // keyboard accessibility: space -> shuffle
+    window.addEventListener('keydown', e => {
+      if(e.code === 'Space'){
+        e.preventDefault();
+        shuffleBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>

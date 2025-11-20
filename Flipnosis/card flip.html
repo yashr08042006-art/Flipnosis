@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memory Card with Level Progression</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: #1e1e1e;
+    color: #fafafa;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: hidden;
+    padding: 20px 10px 50px;
+  }
+  header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  main {
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+  }
+  .level-display {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .difficulty-bar {
+    width: 100%;
+    max-width: 400px;
+    height: 30px;
+    background: #333;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 0 auto 10px;
+  }
+  .difficulty-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 15px 0 0 15px;
+  }
+  .difficulty-text {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  button {
+    padding: 12px 30px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 25px;
+    background: #ff4e50;
+    color: #fff;
+    cursor: pointer;
+    margin: 10px;
+  }
+  button:disabled {
+    background: #888;
+    cursor: not-allowed;
+  }
+
+  #lives, #timer, #score {
+    font-size: 20px;
+    margin: 10px 0;
+  }
+
+  #game {
+    display: grid;
+    gap: 10px;
+    margin: 0 auto;
+    width: fit-content;
+  }
+  .card {
+    width: 80px;
+    height: 80px;
+    background-color: #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: white;
+    cursor: pointer;
+    border-radius: 10px;
+    user-select: none;
+  }
+  .flipped {
+    background-color: #28a745;
+  }
+  #game-over { color: #dc3545; display:none; }
+  #win-message { color: #28a745; display:none; }
+</style>
+</head>
+<body>
+
+<header>Flipcard Memory Game</header>
+
+<main>
+  <div class="level-display" id="levelDisplay">Level 1</div>
+  <div class="difficulty-bar"><div class="difficulty-fill" id="difficultyFill"></div></div>
+  <div class="difficulty-text" id="difficultyText">Difficulty: Very Easy</div>
+
+  <div id="lives">Lives Left : 10</div>
+  <div id="timer">Time: 0s</div>
+  <div id="score">Score: 0</div>
+
+  <div id="game"></div>
+  <div id="game-over">Game Over! You Lost!</div>
+  <div id="win-message">Congratulations! You won!</div>
+
+  <button id="nextLevelBtn" disabled>Next Level</button>
+</main>
+
+<script>
+  const maxLevel = 20;
+  let currentLevel = 1, livesLeft = 10, score = 0, timeElapsed = 0, timerInterval;
+
+  const levelDisplay = document.getElementById('levelDisplay');
+  const difficultyFill = document.getElementById('difficultyFill');
+  const difficultyText = document.getElementById('difficultyText');
+  const nextLevelBtn = document.getElementById('nextLevelBtn');
+  const gameArea = document.getElementById("game");
+  const livesDisplay = document.getElementById("lives");
+  const timerDisplay = document.getElementById("timer");
+  const scoreDisplay = document.getElementById("score");
+  const gameOverDisplay = document.getElementById("game-over");
+  const winMessage = document.getElementById("win-message");
+
+  let firstCard = null, secondCard = null, lockBoard = false;
+  const allSymbols = ['🍌','🍎','🍰','🐠','🎈','🕘','🍓','😊','🍇','🌟','🍉','🍍','🍒','🍋','🥝','🍑','🥥','🥭','🍔','🍕'];
+
+  const difficulties = [
+    { maxLevel: 5, label: 'Very Easy', color: '#4CAF50' },
+    { maxLevel: 10, label: 'Easy', color: '#CDDC39' },
+    { maxLevel: 15, label: 'Medium', color: '#FFC107' },
+    { maxLevel: 20, label: 'Hard', color: '#F44336' }
+  ];
+
+  function getDifficultyTier(level){ return difficulties.find(tier => level <= tier.maxLevel); }
+
+  function updateUI(){
+    levelDisplay.textContent = `Level ${currentLevel}`;
+    let difficultyPercent = (currentLevel / maxLevel) * 100;
+    difficultyFill.style.width = difficultyPercent + '%';
+    const tier = getDifficultyTier(currentLevel);
+    difficultyFill.style.backgroundColor = tier.color;
+    difficultyText.textContent = `Difficulty: ${tier.label}`;
+  }
+
+  function startTimer(){
+    clearInterval(timerInterval);
+    timeElapsed = 0;
+    timerInterval = setInterval(() => {
+      timeElapsed++;
+      timerDisplay.textContent = `Time: ${timeElapsed}s`;
+    }, 1000);
+  }
+
+  function stopTimer(){ clearInterval(timerInterval); }
+
+  function updateScore(points){
+    score += points;
+    scoreDisplay.textContent = `Score: ${score}`;
+  }
+
+  function createCards(){
+    gameArea.innerHTML = "";
+    const basePairs = 8;
+    let pairsCount = basePairs + Math.floor((currentLevel - 1) / 5) * 2;
+    pairsCount = Math.min(pairsCount, allSymbols.length);
+    livesLeft = 30 - Math.floor((currentLevel - 1) / 5);
+    if(livesLeft < 5) livesLeft = 5;
+    livesDisplay.textContent = `Lives Left : ${livesLeft}`;
+
+    const cardSymbols = allSymbols.slice(0, pairsCount);
+    const cardValues = [...cardSymbols, ...cardSymbols].sort(() => 0.5 - Math.random());
+    let cols = pairsCount >= 12 ? 6 : pairsCount >= 10 ? 5 : 4;
+    gameArea.style.gridTemplateColumns = `repeat(${cols}, 80px)`;
+
+    cardValues.forEach(symbol => {
+      const card = document.createElement("div");
+      card.classList.add("card");
+      card.setAttribute("data-symbol", symbol);
+      card.textContent = symbol; // show initially
+      gameArea.appendChild(card);
+    });
+
+    // Show all cards for 2.5s, then hide
+    setTimeout(() => {
+      document.querySelectorAll(".card").forEach(card => {
+        card.textContent = "";
+        card.addEventListener("click", flipCard);
+      });
+      startTimer(); // start timer after reveal
+    }, 2500);
+  }
+
+  function flipCard(){
+    if(lockBoard) return;
+    if(this === firstCard) return;
+    if(this.classList.contains("flipped")) return;
+    this.classList.add("flipped");
+    this.textContent = this.getAttribute("data-symbol");
+    if(!firstCard) firstCard = this;
+    else { secondCard = this; checkForMatch(); }
+  }
+
+  function checkForMatch(){
+    lockBoard = true;
+    const isMatch = firstCard.getAttribute("data-symbol") === secondCard.getAttribute("data-symbol");
+    if(isMatch){ disableCards(); updateScore(10); }
+    else unflipCards();
+  }
+
+  function disableCards(){
+    firstCard.removeEventListener("click", flipCard);
+    secondCard.removeEventListener("click", flipCard);
+    resetBoard();
+    if(document.querySelectorAll('.card.flipped').length === gameArea.children.length){
+      stopTimer();
+      winMessage.style.display = "block";
+      nextLevelBtn.disabled = false;
+      updateScore(50 - timeElapsed); // reward speed
+    }
+  }
+
+  function unflipCards(){
+    livesLeft--;
+    livesDisplay.textContent = `Lives Left : ${livesLeft}`;
+    setTimeout(() => {
+      firstCard.classList.remove("flipped");
+      firstCard.textContent = "";
+      secondCard.classList.remove("flipped");
+      secondCard.textContent = "";
+      resetBoard();
+    }, 800);
+    if(livesLeft === 0){ endGame(false); }
+  }
+
+  function resetBoard(){ [firstCard, secondCard, lockBoard] = [null, null, false]; }
+
+  function endGame(isWin){
+    stopTimer();
+    gameArea.style.display = "none";
+    nextLevelBtn.disabled = !isWin;
+    if(isWin){ winMessage.style.display = "block"; updateScore(100); }
+    else gameOverDisplay.style.display = "block";
+  }
+
+  // Init game
+  updateUI();
+  createCards();
+  nextLevelBtn.disabled = true;
+
+  nextLevelBtn.addEventListener('click', () => {
+    if(currentLevel < maxLevel){
+      currentLevel++;
+      updateUI();
+      createCards();
+      nextLevelBtn.disabled = true;
+      winMessage.style.display = "none";
+      gameOverDisplay.style.display = "none";
+      gameArea.style.display = "grid";
+    }
+  });
+</script>
+</body>
+</html>

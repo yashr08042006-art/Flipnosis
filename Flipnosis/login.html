@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flipnosis - Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #8A00C4, #B026FF);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+
+    .login-container {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      width: 380px;
+      text-align: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      height: 60px;
+      margin-right: 10px;
+    }
+
+    .logo span {
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-shadow: 0 0 10px #fff, 0 0 20px #B026FF;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input {
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #ddd;
+    }
+
+    input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+    }
+
+    .login-btn {
+      background: #FFD700;
+      color: #8A00C4;
+      font-weight: bold;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .login-btn:hover {
+      background: #FFA500;
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    .or-divider {
+      margin: 20px 0;
+      font-size: 0.9rem;
+      color: #ccc;
+      position: relative;
+    }
+
+    .or-divider::before,
+    .or-divider::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #555;
+    }
+
+    .or-divider::before {
+      left: 0;
+    }
+
+    .or-divider::after {
+      right: 0;
+    }
+
+    /* Social Buttons */
+    .social-login {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .social-btn {
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: 0.3s;
+    }
+
+    .google {
+      background: #fff;
+      color: #000;
+    }
+
+    .google:hover {
+      background: #ddd;
+    }
+
+    .facebook {
+      background: #1877F2;
+      color: #fff;
+    }
+
+    .facebook:hover {
+      background: #0d5bd6;
+    }
+
+    .twitter {
+      background: #000;
+      color: #fff;
+    }
+
+    .twitter:hover {
+      background: #333;
+    }
+
+    .signup-link {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      color: #ddd;
+    }
+
+    .signup-link a {
+      color: #FFD700;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .signup-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <div class="logo">
+      <img src="Flipnosis.png" alt="Flipnosis Logo">
+      <span>Flipnosis</span>
+    </div>
+
+    <h2>Login to Your Account</h2>
+
+    <form>
+      <input type="email" placeholder="Email" required>
+      <input type="password" placeholder="Password" required>
+
+      <div class="checkbox-container">
+        <input type="checkbox">
+        <label>Remember Me</label>
+      </div>
+
+      <button type="submit" class="login-btn"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+    </form>
+
+    <div class="or-divider">OR</div>
+
+    <div class="social-login">
+      <button class="social-btn google"><i class="fa-brands fa-google"></i> Continue with Google</button>
+      <button class="social-btn facebook"><i class="fa-brands fa-facebook-f"></i> Continue with Facebook</button>
+      <button class="social-btn twitter"><i class="fa-brands fa-x-twitter"></i> Continue with Twitter</button>
+    </div>
+
+    <div class="signup-link">
+      Don’t have an account? <a href="signup.html">Signup</a>
+    </div>
+  </div>
+</body>
+
+</html>

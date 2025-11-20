@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uno Game - Playable Version</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ff6f61, #ffb347);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      transition: background 0.5s ease;
+    }
+
+    .game-container {
+      width: 90vw;
+      max-width: 900px;
+      text-align: center;
+      color: #fff;
+      user-select: none;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #000;
+    }
+
+    .instructions {
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #eee;
+      text-shadow: 0 0 5px #000;
+    }
+
+    .game-area {
+      position: relative;
+      margin: 20px auto;
+      height: 300px;
+      border-radius: 10px;
+      background: #222;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+    }
+
+    .player-hand, .opponent-hand {
+      display: flex;
+      gap: 8px;
+      max-width: 400px;
+      overflow-x: auto;
+      padding: 5px;
+      border: 2px solid #444;
+      border-radius: 8px;
+      min-height: 110px;
+    }
+
+    .opponent-hand {
+      filter: brightness(0.6);
+    }
+
+    .discard-pile, .draw-pile {
+      width: 80px;
+      height: 120px;
+      border-radius: 10px;
+      background: #444;
+      box-shadow: 0 0 15px rgba(255,255,255,0.2);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      color: #ccc;
+      user-select: none;
+    }
+
+    .draw-pile {
+      background: linear-gradient(45deg, #666, #333);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .draw-pile:hover {
+      box-shadow: 0 0 25px #fff;
+    }
+
+    .card {
+      width: 60px;
+      height: 90px;
+      border-radius: 8px;
+      background: white;
+      color: black;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      user-select: none;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .card.red { background-color: #ff3b3b; color: white; }
+    .card.green { background-color: #3bff3b; color: white; }
+    .card.blue { background-color: #3b3bff; color: white; }
+    .card.yellow { background-color: #fff53b; color: black; }
+
+    .card:hover {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 6px 10px rgba(0,0,0,0.5);
+    }
+
+    /* Disabled (not playable) cards */
+    .card.disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+      pointer-events: none;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Highlight playable cards */
+    .card.playable {
+      box-shadow: 0 0 12px 3px #fff;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px 2px #fff; }
+      50% { box-shadow: 0 0 15px 5px #fff; }
+      100% { box-shadow: 0 0 10px 2px #fff; }
+    }
+
+    .info-panel {
+      margin-top: 20px;
+      font-size: 18px;
+      min-height: 30px;
+      min-width: 250px;
+      color: #eee;
+      text-shadow: 0 0 5px #000;
+      font-weight: 600;
+    }
+
+    .restart-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #444;
+      color: #eee;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #000;
+      transition: background 0.3s ease;
+    }
+    .restart-btn:hover {
+      background: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>UNO</h1>
+    <div class="instructions">
+      Click a card to play it if it matches the color or number of the discard pile.<br/>
+      Click the draw pile to draw a card (only if you have no playable cards).
+    </div>
+    <div class="game-area">
+      <div class="player-hand" title="Your Hand"></div>
+      <div class="discard-pile" title="Discard Pile"></div>
+      <div class="draw-pile" title="Draw Pile">Draw</div>
+      <div class="opponent-hand" title="Opponent's Hand"></div>
+    </div>
+    <div class="info-panel"></div>
+  </div>
+
+  <script>
+    const colors = ['red', 'green', 'blue', 'yellow'];
+    const numbers = Array.from({ length: 10 }, (_, i) => i); // 0-9 cards
+
+    let deck = [];
+    let playerHand = [];
+    let opponentHand = [];
+    let discardPile = [];
+    let currentColor = null;
+    let currentNumber = null;
+    let gameOver = false;
+
+    const playerHandDiv = document.querySelector('.player-hand');
+    const opponentHandDiv = document.querySelector('.opponent-hand');
+    const discardPileDiv = document.querySelector('.discard-pile');
+    const drawPileDiv = document.querySelector('.draw-pile');
+    const infoPanel = document.querySelector('.info-panel');
+
+    function createDeck() {
+      deck = [];
+      for (let color of colors) {
+        for (let number of numbers) {
+          deck.push({ color, number });
+          // Normally, Uno has two of each card except zero, simplified here
+        }
+      }
+      // Shuffle deck
+      deck = deck.sort(() => Math.random() - 0.5);
+    }
+
+    function drawCard(hand) {
+      if (deck.length === 0) {
+        alert('Deck is empty!');
+        return null;
+      }
+      const card = deck.pop();
+      hand.push(card);
+      return card;
+    }
+
+    function canPlayCard(card) {
+      return card.color === currentColor || card.number === currentNumber;
+    }
+
+    function hasPlayableCard(hand) {
+      return hand.some(card => canPlayCard(card));
+    }
+
+    function renderHand(hand, container, isPlayer = false) {
+      container.innerHTML = '';
+      hand.forEach((card, index) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = `card ${card.color}`;
+        cardDiv.textContent = card.number;
+
+        if (isPlayer) {
+          if (canPlayCard(card)) {
+            cardDiv.classList.add('playable');
+            cardDiv.addEventListener('click', () => playCard(index));
+          } else {
+            cardDiv.classList.add('disabled');
+          }
+        }
+
+        container.appendChild(cardDiv);
+      });
+    }
+
+    function renderDiscardPile() {
+      discardPileDiv.innerHTML = '';
+      if (discardPile.length === 0) return;
+      const topCard = discardPile[discardPile.length - 1];
+      const cardDiv = document.createElement('div');
+      cardDiv.className = `card ${topCard.color}`;
+      cardDiv.textContent = topCard.number;
+      discardPileDiv.appendChild(cardDiv);
+
+      currentColor = topCard.color;
+      currentNumber = topCard.number;
+
+      // Change background based on current color, darken it a bit
+      const bgColors = {
+        red: '#b22222',
+        green: '#228b22',
+        blue: '#1e90ff',
+        yellow: '#daa520'
+      };
+      document.body.style.background = `linear-gradient(135deg, ${bgColors[currentColor]}, #000)`;
+    }
+
+    function playCard(cardIndex) {
+      if (gameOver) return;
+      const card = playerHand[cardIndex];
+      if (canPlayCard(card)) {
+        discardPile.push(card);
+        playerHand.splice(cardIndex, 1);
+        renderHand(playerHand, playerHandDiv, true);
+        renderDiscardPile();
+        infoPanel.textContent = 'You played a card!';
+        if (playerHand.length === 0) {
+          endGame(true);
+          return;
+        }
+        setTimeout(opponentTurn, 800);
+      } else {
+        infoPanel.textContent = 'You cannot play this card!';
+      }
+    }
+
+    function endGame(playerWon) {
+      gameOver = true;
+      if (playerWon) {
+        infoPanel.innerHTML = '🎉 You win! Refresh to play again.';
+      } else {
+        infoPanel.innerHTML = '😢 Opponent wins! Refresh to try again.';
+      }
+      drawPileDiv.removeEventListener('click', drawFromPile);
+      disablePlayerCards();
+    }
+
+    function disablePlayerCards() {
+      playerHandDiv.querySelectorAll('.card').forEach(card => {
+        card.style.pointerEvents = 'none';
+      });
+    }
+
+    function opponentTurn() {
+      if (gameOver) return;
+      infoPanel.textContent = "Opponent's turn...";
+      setTimeout(() => {
+        // Basic AI: play first valid card or draw
+        let played = false;
+        for (let i = 0; i < opponentHand.length; i++) {
+          let c = opponentHand[i];
+          if (canPlayCard(c)) {
+            discardPile.push(c);
+            opponentHand.splice(i, 1);
+            played = true;
+            break;
+          }
+        }
+        if (!played) {
+          drawCard(opponentHand);
+        }
+        renderHand(opponentHand, opponentHandDiv);
+        renderDiscardPile();
+
+        if (opponentHand.length === 0) {
+          endGame(false);
+          return;
+        }
+
+        infoPanel.textContent = "Your turn!";
+        renderHand(playerHand, playerHandDiv, true);
+      }, 1200);
+    }
+
+    function drawFromPile() {
+      if (gameOver) return;
+      if (hasPlayableCard(playerHand)) {
+        infoPanel.textContent = 'You have a playable card. Play it or pass your turn.';
+        return;
+      }
+      const card = drawCard(playerHand);
+      if (card) {
+        renderHand(playerHand, playerHandDiv, true);
+        infoPanel.textContent = 'You drew a card.';
+      }
+    }
+
+    function startGame() {
+      gameOver = false;
+      createDeck();
+      playerHand = [];
+      opponentHand = [];
+      discardPile = [];
+
+      // Deal 7 cards each
+      for (let i = 0; i < 7; i++) {
+        drawCard(playerHand);
+        drawCard(opponentHand);
+      }
+
+      // Initial discard card
+      let firstCard = deck.pop();
+      discardPile.push(firstCard);
+      currentColor = firstCard.color;
+      currentNumber = firstCard.number;
+
+      renderHand(playerHand, playerHandDiv, true);
+      renderHand(opponentHand, opponentHandDiv);
+      renderDiscardPile();
+
+      infoPanel.textContent = 'Your turn!';
+      drawPileDiv.addEventListener('click', drawFromPile);
+    }
+
+    startGame();
+  </script>
+</body>
+</html>

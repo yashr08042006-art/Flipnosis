@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>FlipStar Logo — demo</title>
+    <style>
+        :root {
+            --bg: #0f1724;
+            --accent1: #ffb86b;
+            --accent2: #7c3aed;
+            --muted: #94a3b8;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, var(--bg), #071126);
+            color: #fff
+        }
+
+        .logo-wrap {
+            display: inline-grid;
+            place-items: center;
+            gap: 12px;
+            padding: 20px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            box-shadow: 0 6px 30px rgba(2, 6, 23, 0.6);
+            backdrop-filter: blur(6px);
+        }
+
+        .flipstar {
+            width: 160px;
+            height: 160px;
+            display: block;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 420ms cubic-bezier(.2, .9, .2, 1);
+        }
+
+        .flipstar:hover {
+            transform: translateY(-6px) rotate(-6deg) scale(1.04)
+        }
+
+        .logo-shell {
+            position: relative;
+            width: 160px;
+            height: 160px
+        }
+
+        .play-btn,
+        .start-btn {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--accent2), var(--accent1));
+            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.28);
+            border: none;
+            cursor: pointer;
+            transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 0 14px;
+            height: 40px;
+            min-width: 80px;
+        }
+
+        .play-btn {
+            width: 56px;
+            height: 56px;
+            padding: 0
+        }
+
+        .play-btn:active,
+        .start-btn:active {
+            transform: translate(-50%, -50%) scale(0.96)
+        }
+
+        .play-btn .triangle {
+            width: 0;
+            height: 0;
+            border-left: 12px solid white;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            margin-left: 4px
+        }
+
+        .brand {
+            font-weight: 600;
+            font-size: 18px;
+            letter-spacing: 0.4px;
+            color: var(--muted);
+            text-align: center
+        }
+
+        .brand strong {
+            color: var(--accent1);
+            font-weight: 700
+        }
+
+        .is-playing .flipstar {
+            animation: flip 900ms ease-in-out
+        }
+
+        @keyframes flip {
+            0% {
+                transform: rotateY(0)
+            }
+
+            50% {
+                transform: rotateY(180deg)
+            }
+
+            100% {
+                transform: rotateY(0)
+            }
+        }
+
+        .play-btn:focus,
+        .start-btn:focus {
+            outline: 3px solid rgba(124, 58, 237, 0.25);
+            outline-offset: 4px
+        }
+
+        @media (max-width:420px) {
+            .flipstar {
+                width: 120px;
+                height: 120px
+            }
+
+            .logo-shell {
+                width: 120px;
+                height: 120px
+            }
+
+            .play-btn {
+                width: 44px;
+                height: 44px
+            }
+
+            .brand {
+                font-size: 14px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="logo-wrap" role="region" aria-label="FlipStar logo demo">
+        <div class="logo-shell" id="logoShell">
+            <svg class="flipstar" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img"
+                aria-labelledby="title desc">
+                <title id="title">FlipStar logo</title>
+                <desc id="desc">Stylized star with glossy gradients and a small play icon overlay</desc>
+                <defs>
+                    <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+                        <stop offset="0%" stop-color="#fff6e5" stop-opacity="0.95" />
+                        <stop offset="45%" stop-color="#ffb86b" stop-opacity="0.95" />
+                        <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.95" />
+                    </linearGradient>
+                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="b" />
+                        <feMerge>
+                            <feMergeNode in="b" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                    <radialGradient id="shine" cx="30%" cy="20%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+                        <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+                    </radialGradient>
+                </defs>
+
+                <circle cx="100" cy="100" r="92" fill="url(#g1)" opacity="0.08" />
+                <path d="M100 20 L123 74 L180 80 L138 116 L150 175 L100 146 L50 175 L62 116 L20 80 L77 74 Z"
+                    fill="url(#g1)" stroke="rgba(255,255,255,0.15)" stroke-width="2" filter="url(#glow)" />
+                <path d="M100 28 L116 68 L155 72 L125 98 L136 136 L100 116 L64 136 L75 98 L45 72 L84 68 Z"
+                    fill="url(#shine)" opacity="0.18" />
+                <path d="M100 60 L114 90 L146 96 L122 118 L130 150 L100 132 L70 150 L78 118 L54 96 L86 90 Z"
+                    fill="rgba(0,0,0,0.06)" />
+            </svg>
+
+            <button class="play-btn" id="playBtn" aria-pressed="false" aria-label="Play FlipStar demo">
+                <span class="triangle" aria-hidden="true"></span>
+            </button><a href="card flip.html"button class="start-btn" id="startBtn" aria-label="Start FlipStar">START</button>
+        </div>
+
+        <div class="brand">Flip<strong>Star</strong></div>
+    </div>
+
+    <script>
+        (function () {
+            const playBtn = document.getElementById('playBtn');
+            const startBtn = document.getElementById('startBtn');
+            const outer = document.querySelector('.logo-wrap');
+
+            function setPlaying(isPlaying) {
+                playBtn.setAttribute('aria-pressed', String(!!isPlaying));
+                if (isPlaying) outer.classList.add('is-playing'); else outer.classList.remove('is-playing');
+            }
+
+            playBtn.addEventListener('click', function () {
+                const pressed = playBtn.getAttribute('aria-pressed') === 'true';
+                setPlaying(!pressed);
+            });
+
+            document.querySelector('.flipstar').addEventListener('click', function () {
+                const pressed = playBtn.getAttribute('aria-pressed') === 'true';
+                setPlaying(!pressed);
+            });
+
+            playBtn.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playBtn.click(); }
+            });
+
+            startBtn.addEventListener('click', function () {
+                alert('FlipStar started!');
+            });
+
+            setPlaying(false);
+        })();
+    </script>
+</body>
+
+</html>

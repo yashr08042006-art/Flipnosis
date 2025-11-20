@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flipnosis - Payment Options</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #8A00C4, #B026FF);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .payment-container {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #fff, 0 0 20px #B026FF;
+    }
+
+    .payment-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .pay-btn {
+      background: #fff;
+      color: #8A00C4;
+      border: none;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .pay-btn:hover {
+      background: #FFD700;
+      color: #000;
+      transform: scale(1.05);
+    }
+
+    .pay-btn i {
+      font-size: 1.2rem;
+    }
+
+    .qr-section {
+      margin-top: 30px;
+    }
+
+    .qr-section img {
+      width: 200px;
+      height: auto;
+      border: 5px solid #FFD700;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    }
+
+    .qr-section p {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #FFD700;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="payment-container">
+    <h2>Select Your Payment Method</h2>
+
+    <div class="payment-options">
+      <a href="https://pay.google.com/" target="_blank" class="pay-btn"><i class="fa-brands fa-google"></i> Google Pay</a>
+      <a href="https://www.phonepe.com/" target="_blank" class="pay-btn"><i class="fa-solid fa-phone"></i> PhonePe</a>
+      <a href="https://paytm.com/" target="_blank" class="pay-btn"><i class="fa-solid fa-wallet"></i> Paytm</a>
+      <a href="https://www.upi.org/" target="_blank" class="pay-btn"><i class="fa-solid fa-university"></i> UPI</a>
+      <a href="https://www.visa.com/" target="_blank" class="pay-btn"><i class="fa-solid fa-credit-card"></i> Debit Card</a>
+      <a href="https://www.mastercard.com/" target="_blank" class="pay-btn"><i class="fa-regular fa-credit-card"></i> Credit Card</a>
+      <a href="https://www.onlinesbi.com/" target="_blank" class="pay-btn"><i class="fa-solid fa-building-columns"></i> Net Banking</a>
+      <a href="https://www.amazon.in/pay" target="_blank" class="pay-btn"><i class="fa-brands fa-amazon"></i> Amazon Pay</a>
+      <a href="https://www.paypal.com/" target="_blank" class="pay-btn"><i class="fa-brands fa-paypal"></i> PayPal</a>
+      <a href="https://www.apple.com/apple-pay/" target="_blank" class="pay-btn"><i class="fa-brands fa-apple"></i> Apple Pay</a>
+      <a href="https://www.samsung.com/pay/" target="_blank" class="pay-btn"><i class="fa-solid fa-mobile"></i> Samsung Pay</a>
+      <a href="https://www.visa.com/" target="_blank" class="pay-btn"><i class="fa-brands fa-cc-visa"></i> Visa</a>
+      <a href="https://www.mastercard.com/" target="_blank" class="pay-btn"><i class="fa-brands fa-cc-mastercard"></i> MasterCard</a>
+      <a href="https://www.rupay.co.in/" target="_blank" class="pay-btn"><i class="fa-solid fa-credit-card"></i> RuPay</a>
+      <a href="https://stripe.com/" target="_blank" class="pay-btn"><i class="fa-brands fa-stripe"></i> Stripe</a>
+    </div>
+
+    <div style="margin-top: 25px;">
+      <a href="#" class="pay-btn" style="background:#FFD700; color:#000; width:100%;">
+        <i class="fa-solid fa-money-bill-wave"></i> Cash on Delivery
+      </a>
+    </div>
+
+    <!-- QR Code Section -->
+    <div class="qr-section">
+      <img src="qrcode.jpeg" alt="Payment QR Code">
+      <p>Scan to Pay</p>
+    </div>
+
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Money Mining</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #bd99f3;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #controls {
+      margin-bottom: 15px;
+    }
+
+    input[type=number] {
+      width: 80px;
+      padding: 5px;
+      margin-right: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    button {
+      background-color: #00b894;
+      border: none;
+      padding: 8px 14px;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      background-color: #764d9d;
+      cursor: not-allowed;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(9, 60px);
+      grid-template-rows: repeat(9, 60px);
+      gap: 8px;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      background-color: #2d3436;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      user-select: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .cell.safe {
+      background-color: #00b894;
+      cursor: default;
+    }
+
+    .cell.mine {
+      background-color: #d63031;
+      cursor: default;
+    }
+
+    #info {
+      margin-top: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Money Mining</h1>
+
+  <div id="controls">
+    <label for="stake">Stake ($):</label>
+    <input type="number" id="stake" min="1" value="10" />
+    <button id="startBtn">Start Game</button>
+    <button id="cashoutBtn" disabled>Cash Out</button>
+  </div>
+
+  <div id="grid"></div>
+
+  <div id="info">
+    <p>Multiplier: <span id="multiplier">1.00x</span></p>
+    <p>Potential Winnings: $<span id="winnings">0.00</span></p>
+    <p>Time Left: <span id="timer">50</span> sec</p>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const cashoutBtn = document.getElementById('cashoutBtn');
+    const stakeInput = document.getElementById('stake');
+    const grid = document.getElementById('grid');
+    const multiplierDisplay = document.getElementById('multiplier');
+    const winningsDisplay = document.getElementById('winnings');
+    const message = document.getElementById('message');
+    const timerDisplay = document.getElementById('timer');
+
+    const ROWS = 8;
+    const COLS = 8;
+    const MINES_COUNT = 60;
+
+    let minePositions = new Set();
+    let clickedCells = new Set();
+    let gameActive = false;
+    let stake = 0;
+    let multiplier = 1;
+    let safeClicks = 0;
+    let timer;
+    let timeLeft = 50;
+
+    function generateMines() {
+      minePositions.clear();
+      while (minePositions.size < MINES_COUNT) {
+        const pos = Math.floor(Math.random() * ROWS * COLS);
+        minePositions.add(pos);
+      }
+    }
+
+    function createGrid() {
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${COLS}, 60px)`;
+      grid.style.gridTemplateRows = `repeat(${ROWS}, 60px)`;
+
+      for (let i = 0; i < ROWS * COLS; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = i;
+        cell.addEventListener('click', onCellClick);
+        grid.appendChild(cell);
+      }
+    }
+
+    function revealAllTemp() {
+      const cells = grid.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        const idx = parseInt(cell.dataset.index);
+        if (minePositions.has(idx)) {
+          cell.textContent = '💣';
+        } else {
+          cell.textContent = '🤑';
+        }
+      });
+
+      setTimeout(() => {
+        cells.forEach(cell => {
+          cell.textContent = ''; // hide again
+        });
+        gameActive = true; // allow playing only after flip back
+      }, 1500);
+    }
+
+    function onCellClick(e) {
+      if (!gameActive) return;
+
+      const cell = e.currentTarget;
+      const idx = parseInt(cell.dataset.index);
+
+      if (clickedCells.has(idx)) return;
+
+      clickedCells.add(idx);
+
+      if (minePositions.has(idx)) {
+        cell.classList.add('mine');
+        cell.textContent = '💩';
+        gameOver(false);
+      } else {
+        cell.classList.add('safe');
+        safeClicks++;
+        multiplier = (1 + safeClicks * 0.2).toFixed(2);
+        cell.textContent = '🤑';
+        updateDisplays();
+      }
+    }
+
+    function updateDisplays() {
+      multiplierDisplay.textContent = multiplier + 'x';
+      winningsDisplay.textContent = (stake * multiplier).toFixed(2);
+    }
+
+    function startTimer() {
+      timeLeft = 50;
+      timerDisplay.textContent = timeLeft;
+      timer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          gameOver(false, true); // timeout end
+        }
+      }, 1000);
+    }
+
+    function gameOver(won, timeout = false) {
+      gameActive = false;
+      cashoutBtn.disabled = true;
+      startBtn.disabled = false;
+      stakeInput.disabled = false;
+      clearInterval(timer);
+
+      if (won) {
+        message.textContent = `You cashed out and won $${(stake * multiplier).toFixed(2)}! 🎉`;
+      } else if (timeout) {
+        message.textContent = `⏳ Time's up! Game over.`;
+        revealMines();
+      } else {
+        message.textContent = `Boom! You hit a mine and lost your Money. 💥`;
+        revealMines();
+      }
+    }
+
+    function revealMines() {
+      minePositions.forEach(idx => {
+        const cell = grid.querySelector(`.cell[data-index='${idx}']`);
+        if (!cell.classList.contains('mine')) {
+          cell.classList.add('mine');
+          cell.textContent = '💣';
+        }
+      });
+    }
+
+    startBtn.addEventListener('click', () => {
+      stake = parseFloat(stakeInput.value);
+      if (isNaN(stake) || stake <= 0) {
+        alert('Please enter a valid stake greater than 0.');
+        return;
+      }
+      multiplier = 1;
+      safeClicks = 0;
+      clickedCells.clear();
+      message.textContent = '';
+      updateDisplays();
+
+      generateMines();
+      createGrid();
+
+      gameActive = false; // block clicks before reveal
+      cashoutBtn.disabled = false;
+      startBtn.disabled = true;
+      stakeInput.disabled = true;
+
+      revealAllTemp(); // show mines/safe for 1.5s
+      startTimer();    // start 50s countdown
+    });
+
+    cashoutBtn.addEventListener('click', () => {
+      if (!gameActive) return;
+      gameOver(true);
+    });
+  </script>
+
+</body>
+
+</html>
+
